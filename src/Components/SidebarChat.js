@@ -7,6 +7,17 @@ import { Link } from 'react-router-dom';
 
 
 function SidebarChat({ id, name, addNewChat }) {
+
+    const [lastMessage, setLastMessage] = useState('');
+
+    useEffect(() => {
+        if(id) {
+            db.collection('chats').doc(id).collection('messages').orderBy('timestamp', 'desc').onSnapshot(snapshot => (
+                setLastMessage(snapshot.docs.map(doc => doc.data()))
+            ))
+        }
+    }, [id])
+
     const createChat = () => {
         const chatName = prompt("Enter a chat name");
 
@@ -25,7 +36,7 @@ function SidebarChat({ id, name, addNewChat }) {
                 <Avatar src={`https://avatars.dicebear.com/api/human/${Math.floor(Math.random() * 5000)}.svg`} />
                 <div className="sidebarChat__info">
                     <h2>{name}</h2>
-                    <p>Last Message</p>
+                    <p>{lastMessage[0]?.message}</p>
                 </div>
             </div>
         </Link>

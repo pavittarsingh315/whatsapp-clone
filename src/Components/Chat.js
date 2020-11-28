@@ -49,7 +49,12 @@ function Chat() {
                 <Avatar src={`https://avatars.dicebear.com/api/human/${Math.floor(Math.random() * 5000)}.svg`} />
                 <div className="chat__headerInfo">
                     <h3>{chatName}</h3>
-                    <p>Last Seen at...</p>
+                    <p>
+                        Last Seen {" "}
+                        {new Date(
+                            texts[texts.length - 1]?.timestamp?.toDate()
+                        ).toUTCString()}
+                    </p>
                 </div>
                 <div className="chat__headerRight">
                     <IconButton>
