@@ -9,24 +9,36 @@ import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 
 import { useParams } from 'react-router-dom';
 import db from '../firebase';
+import { useStateValue } from '../StateProvider';
+import firebase from 'firebase';
 
 
 function Chat() {
     const [message, setMessage] = useState('');
     const { chatId } = useParams();
     const [chatName, setChatName] = useState('');
+    const [texts, setTexts] = useState([]);
+    const [{ user }, dispatch] = useStateValue();
 
     useEffect(() => {
         if(chatId) {
             db.collection('chats').doc(chatId).onSnapshot(snapshot => (
                 setChatName(snapshot.data().name)
             ))
+
+            db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp', 'asc').onSnapshot(snapshot => (
+                setTexts(snapshot.docs.map(doc => doc.data()))
+            ))
         }
     }, [chatId])
 
     const sendMessage = (e) => {
         e.preventDefault();
-        console.log(message)
+        db.collection('chats').doc(chatId).collection('messages').add({
+            message: message,
+            name: user.displayName,
+            timestamp:firebase.firestore.FieldValue.serverTimestamp()
+        })
         setMessage('');
     }
 
@@ -53,11 +65,16 @@ function Chat() {
             </div>
 
             <div className="chat__body">
-                <p className={`chat__message ${true && 'chat__receiver'}`}>
-                    <span className="chat__name">Pavittar</span>
-                    Hello
-                    <span className="chat__timestamp">4:20pm</span>
-                </p>
+                {texts.map(text => (
+                    <p className={`chat__message ${text.name === user.displayName && "chat__receiver"}`}>
+                        <span className="chat__name">{text.name}</span>
+                        {text.message}
+                        <span className="chat__timestamp">
+                            {/* this formats the json date to a nice date. ? is safety for when the timestamp hasnt yet loaded */}
+                            {new Date(text.timestamp?.toDate()).toUTCString()}
+                        </span>
+                    </p>
+                ))}
             </div>
 
             <div className="chat__footer">

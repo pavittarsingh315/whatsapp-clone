@@ -30,6 +30,7 @@ function Sidebar() {
     return (
         <div className="sidebar">
             <div className="sidebar__header">
+                {/* the ? in user?.photoURL is a safety check for when the image hasnt yet been loaded so it uses the default avatar pic */}
                 <Avatar src={user?.photoURL} />
                 <div className="sidebar__headerRight">
                     <IconButton>
